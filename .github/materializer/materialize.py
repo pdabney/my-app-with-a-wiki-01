@@ -21,13 +21,13 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(__file__).resolve().parents[2]  # .github/materializer/ -> repo root
 # The brain's persistent store. Locally this is ./brain; in CI it is the cloned
 # wiki repo (set via BRAIN_DIR), so the previous graph + append-only changelog
 # survive between runs. This is the brain living *outside* the source tree (ADR 0007).
 BRAIN = Path(os.environ["BRAIN_DIR"]) if os.environ.get("BRAIN_DIR") else REPO / "brain"
 SCHEMA_VERSION = 1
-EXTRACTOR = ["python3", "tools/extract.py"]
+EXTRACTOR = ["python3", ".github/tools/extract.py"]
 
 
 def git_sha() -> str:
@@ -67,6 +67,35 @@ def short_intent(node: dict) -> str:
     return (node.get("intent") or "_(no intent)_").split(". ")[0].strip()
 
 
+def mermaid_map(entities: list[dict], flags: list[dict], edges: list[dict]) -> str:
+    """A Mermaid graph of functions (grouped by module), the flags that gate them,
+    and the exceptions they raise. GitHub wikis render ```mermaid fences."""
+    safe: dict[str, str] = {}
+
+    def sid(nid: str) -> str:
+        return safe.setdefault(nid, f"n{len(safe)}")
+
+    out = ["```mermaid", "graph LR"]
+    by_sub: dict[str, list[dict]] = {}
+    for n in entities:
+        by_sub.setdefault(n["subsystem"], []).append(n)
+    for sub, ns in sorted(by_sub.items()):
+        out.append(f"  subgraph {page_name(sub)}")
+        for n in ns:
+            out.append(f'    {sid(n["id"])}["{n["title"]}"]')
+        out.append("  end")
+    for fl in flags:
+        out.append(f'  {sid(fl["id"])}(["🚩 {fl["title"]}"])')
+    for e in edges:
+        if e["type"] == "gated-by":
+            out.append(f'  {sid(e["from"])} -. flag .-> {sid(e["to"])}')
+        elif e["type"] == "raises":
+            label = e["to"].split(":")[-1]
+            out.append(f'  {sid(e["from"])} -- raises --> {sid(e["to"])}(["{label}"])')
+    out.append("```")
+    return "\n".join(out)
+
+
 # ---- renderers (wiki-flat markdown) ---------------------------------------
 
 def render(nodes: list[dict], edges: list[dict], sha: str, stamp: str) -> dict:
@@ -88,14 +117,16 @@ def render(nodes: list[dict], edges: list[dict], sha: str, stamp: str) -> dict:
         lines = [f"# {page_name(sub)}", ""]
         for n in sorted(ns, key=lambda x: x["title"]):
             f = n["facts"]
-            lines += [f"## `{n['title']}` · {n['type']}", "", n.get("intent") or "_(no intent)_", ""]
+            badge = " 🚩" if f.get("flag") else ""
+            lines += [f"## `{n['title']}` · {n['type']}{badge}", "", n.get("intent") or "_(no intent)_", ""]
             lines.append(f"- **params:** {', '.join(f['params']) or '—'}")
             lines.append(f"- **returns:** {f['returns'] or '—'}")
             lines.append(f"- **raises:** {', '.join(f['raises']) or '—'}")
             if f.get("flag"):
                 lines.append(f"- **feature:** `{f.get('feature') or '—'}` — gated by `{f['flag']}` (see [Features](Features))")
             p = n["provenance"]
-            lines.append(f"- _source:_ `{p['source_path']}` · `{p['source_sha']}` · {p['status']}")
+            mark = " ✓" if p["status"] == "verified" else ""
+            lines.append(f"- _source:_ `{p['source_path']}` · `{p['source_sha']}` · {p['status']}{mark}")
             lines.append("")
         (BRAIN / f"{page_name(sub)}.md").write_text("\n".join(lines) + foot)
 
@@ -114,15 +145,27 @@ def render(nodes: list[dict], edges: list[dict], sha: str, stamp: str) -> dict:
         flines.append("")
     (BRAIN / "Features.md").write_text("\n".join(flines) + foot)
 
-    # Home.md — index
+    # Home.md — index + visual map
     hlines = ["# linkshort — knowledge wiki", "",
               "_Auto-generated from the source on every merge to `main`. This is a derived"
-              " read model; edits here are overwritten._", "", "## Modules", ""]
+              " read model; edits here are overwritten._", "",
+              f"![entities](https://img.shields.io/badge/entities-{len(entities)}-blue) "
+              f"![flags](https://img.shields.io/badge/flags-{len(flags)}-orange) "
+              f"![source](https://img.shields.io/badge/source-{sha}-lightgrey)", "",
+              "## Map", "", mermaid_map(entities, flags, edges), "", "## Modules", ""]
     for sub in sorted(subsystems):
         hlines.append(f"- [{page_name(sub)}]({page_name(sub)}) — {len(subsystems[sub])} functions")
     hlines += ["", "## Operations", "", "- [Features](Features) — feature flags & how to toggle them",
                "- [Changelog](Changelog) — what changed, and why", ""]
     (BRAIN / "Home.md").write_text("\n".join(hlines) + foot)
+
+    # _Sidebar.md / _Footer.md — GitHub wiki's built-in persistent nav + footer
+    side = ["### 🧠 linkshort wiki", "", "[Home](Home)", "", "**Modules**"]
+    side += [f"- [{page_name(s)}]({page_name(s)})" for s in sorted(subsystems)]
+    side += ["", "**Operations**", "- [Features](Features)", "- [Changelog](Changelog)"]
+    (BRAIN / "_Sidebar.md").write_text("\n".join(side) + "\n")
+    (BRAIN / "_Footer.md").write_text(
+        f"_Derived projection · generated from `{sha}` · {stamp} · do not edit_\n")
 
     return subsystems
 

@@ -15,7 +15,7 @@ set -euo pipefail
 
 SLUG="${1:?usage: publish_wiki.sh <owner/repo> [token]}"
 TOKEN="${2:-}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 URL="https://github.com/${SLUG}.wiki.git"
 [ -n "$TOKEN" ] && URL="https://x-access-token:${TOKEN}@github.com/${SLUG}.wiki.git"
@@ -30,7 +30,7 @@ if ! git clone --quiet "$URL" "$WORK"; then
 fi
 
 echo "Materializing into the wiki clone…"
-BRAIN_DIR="$WORK" python3 "$ROOT/materializer/materialize.py"
+BRAIN_DIR="$WORK" python3 "$ROOT/.github/materializer/materialize.py"
 
 cd "$WORK"
 git add -A

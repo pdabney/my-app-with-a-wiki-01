@@ -22,7 +22,7 @@ from flags_registry import load_flags
 
 LANG = "python"
 TAG_RE = re.compile(r"@(\w+)\b")
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(__file__).resolve().parents[2]  # .github/tools/ -> repo root
 
 
 def parse_tags(docstring: str) -> dict[str, list[str]]:
