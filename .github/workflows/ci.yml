@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Tier-1 metadata gate
-        run: python3 tools/check_metadata.py
+        run: python3 .github/tools/check_metadata.py
       - name: Tests
         run: |
           pip install pytest

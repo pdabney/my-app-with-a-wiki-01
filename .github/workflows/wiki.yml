@@ -18,13 +18,13 @@ jobs:
           python-version: "3.12"
 
       - name: Tier-1 metadata gate
-        run: python3 tools/check_metadata.py
+        run: python3 .github/tools/check_metadata.py
 
       - name: Materialize + publish to wiki
         env:
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          chmod +x tools/publish_wiki.sh
+          chmod +x .github/tools/publish_wiki.sh
           # WIKI_TOKEN must be a PAT with repo scope — the default GITHUB_TOKEN
           # generally cannot push to a wiki. If the secret is unset, skip cleanly.
           if [ -z "${{ secrets.WIKI_TOKEN }}" ]; then
@@ -32,4 +32,4 @@ jobs:
             echo "Add a PAT as the WIKI_TOKEN repo secret to enable it."
             exit 0
           fi
-          tools/publish_wiki.sh "${{ github.repository }}" "${{ secrets.WIKI_TOKEN }}"
+          .github/tools/publish_wiki.sh "${{ github.repository }}" "${{ secrets.WIKI_TOKEN }}"
