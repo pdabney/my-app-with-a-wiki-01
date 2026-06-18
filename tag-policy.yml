@@ -1,0 +1,6 @@
+# Required tags on every taggable resource — enforced by the IaC gate (mode: tags).
+required_tags:
+  - Owner
+  - Environment
+  - CostCenter
+  - Service

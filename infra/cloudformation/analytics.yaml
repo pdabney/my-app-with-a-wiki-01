@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Analytics storage for linkshort — owned by data-team.
+
+Resources:
+  ClickAnalyticsBucket:
+    Type: AWS::S3::Bucket
+    Metadata:
+      Intent: Stores exported click-analytics rollups; lifecycle-expired after 90 days.
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-click-analytics'
+      Tags:
+        - Key: Owner
+          Value: data-team
+        - Key: Environment
+          Value: prod
+        - Key: CostCenter
+          Value: cc-5678
+        - Key: Service
+          Value: linkshort
