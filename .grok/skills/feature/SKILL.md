@@ -45,14 +45,27 @@ The core move: the "here's my plan, do you agree?" checkpoint becomes a
 
 5. **Implement to the approved contracts.** The contract is the spec.
 
-6. **Verify.** The CI gate enforces contracts on every PR. Check locally:
+6. **Generate verification stubs** from the approved contracts (before or right
+   after implementation):
 
    ```bash
-   python3 /path/to/dist-brain-metadata-tooling/engine/check_metadata.py --root .
+   python3 /path/to/dist-brain-metadata-tooling/engine/generate_verification.py --root .
    ```
 
-   A failure means code and contract disagree — fix the code, or if intent genuinely
-   changed, re-confirm the revised contract with the engineer.
+   This writes `tests/generated/test_contract_verification.py` — one `@raises` test
+   per declared exception, plus `@returns` smoke tests. Show new stubs for approval;
+   implement any that are still `pytest.fail(...)`.
+
+7. **Verify — the long-running checkpoint.** Not done until all pass:
+
+   ```bash
+   python3 .../engine/check_metadata.py --root .
+   python3 .../engine/generate_verification.py --root . --check
+   PYTHONPATH=src pytest -q
+   ```
+
+   Or run `/verification` for the full loop. A failure means code, contract, or
+   tests disagree — fix and re-run until green.
 
 ## Brain context
 
