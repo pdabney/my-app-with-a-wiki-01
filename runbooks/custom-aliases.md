@@ -1,0 +1,4 @@
+- **When to enable:** only for accounts on the paid tier — billing entitlement is gated upstream by the growth team.
+- **Blast radius:** affects only `create_short_link`'s alias path; auto-generated hash codes are unaffected.
+- **If aliases collide unexpectedly:** check for a case-sensitivity regression *before* disabling. Disabling reverts new links to hash codes but does **not** remove existing alias links.
+- **Escalation:** page `#growth-oncall`.
