@@ -1,0 +1,4 @@
+- **Destructive & irreversible:** deletion removes the link permanently; there is no soft-delete or undo. Confirm intent before enabling in an environment.
+- **Default off:** the flag ships `false`; enable per-environment only after the calling surface has its own confirmation step.
+- **Blast radius:** affects only `delete_link`; resolution and analytics for *other* codes are unaffected.
+- **Escalation:** page `#platform-oncall`.

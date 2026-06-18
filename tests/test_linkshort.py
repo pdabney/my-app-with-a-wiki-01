@@ -4,6 +4,7 @@ from linkshort.store import AliasTaken, InvalidURL, LinkNotFound, LinkStore
 from linkshort.shorten import create_short_link
 from linkshort.resolve import resolve
 from linkshort.analytics import click_count, record_click
+from linkshort.delete import delete_link
 
 
 def test_create_and_resolve():
@@ -42,3 +43,17 @@ def test_unknown_code_raises():
     s = LinkStore()
     with pytest.raises(LinkNotFound):
         resolve(s, "zzz")
+
+
+def test_delete_link_removes_then_unresolvable():
+    s = LinkStore()
+    link = create_short_link(s, "https://x.com")
+    delete_link(s, link.code)
+    with pytest.raises(LinkNotFound):
+        resolve(s, link.code)
+
+
+def test_delete_unknown_raises():
+    s = LinkStore()
+    with pytest.raises(LinkNotFound):
+        delete_link(s, "zzz")

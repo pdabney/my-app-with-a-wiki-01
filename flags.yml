@@ -10,3 +10,7 @@ flags:
     description: Record per-link click counts.
     default: true
     owner: data-team
+  enable_link_deletion:
+    description: Allow permanent deletion of short links.
+    default: false
+    owner: platform-team
