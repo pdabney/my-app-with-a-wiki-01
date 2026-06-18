@@ -1,0 +1,24 @@
+name: ci
+
+# Tier-1 metadata gate + tests. Runs on every PR and push — the gate that keeps
+# colocated metadata honest before it can reach main.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tier-1 metadata gate
+        run: python3 tools/check_metadata.py
+      - name: Tests
+        run: |
+          pip install pytest
+          PYTHONPATH=src pytest -q

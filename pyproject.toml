@@ -1,0 +1,12 @@
+[project]
+name = "linkshort"
+version = "0.1.0"
+description = "Demo app whose colocated metadata is projected into the repo wiki on every merge"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

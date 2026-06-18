@@ -1,0 +1,12 @@
+# Feature flag registry — the source of truth for which flags exist.
+# The Tier-1 gate fails if code references an @flag that is not listed here,
+# and the materializer projects a feature->flag map into the wiki from this file.
+flags:
+  enable_custom_aliases:
+    description: Allow callers to choose their own short code (paid feature).
+    default: false
+    owner: growth-team
+  enable_click_analytics:
+    description: Record per-link click counts.
+    default: true
+    owner: data-team

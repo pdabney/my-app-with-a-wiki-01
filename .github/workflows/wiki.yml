@@ -1,0 +1,35 @@
+name: wiki
+
+# On every merge to main: re-gate, then materialize the brain and publish it to
+# the GitHub wiki. The wiki is a separate git repo, so this never writes back to
+# main (no trigger loop) and the brain lives outside the source tree (ADR 0007).
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tier-1 metadata gate
+        run: python3 tools/check_metadata.py
+
+      - name: Materialize + publish to wiki
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          chmod +x tools/publish_wiki.sh
+          # WIKI_TOKEN must be a PAT with repo scope — the default GITHUB_TOKEN
+          # generally cannot push to a wiki. If the secret is unset, skip cleanly.
+          if [ -z "${{ secrets.WIKI_TOKEN }}" ]; then
+            echo "WIKI_TOKEN secret not set — skipping wiki publish."
+            echo "Add a PAT as the WIKI_TOKEN repo secret to enable it."
+            exit 0
+          fi
+          tools/publish_wiki.sh "${{ github.repository }}" "${{ secrets.WIKI_TOKEN }}"
