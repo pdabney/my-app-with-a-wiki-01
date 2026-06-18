@@ -29,26 +29,20 @@ The core move: the "here's my plan, do you agree?" checkpoint becomes a
    - "What feature name should this belong to?" (if not already decided)
    - "Is this behind a feature flag? If so, what's its default and owning team?"
    - If it introduces a **new** flag, add it to `flags.yml` (description / default /
-     owner) in the same change — the gate will reject an `@flag` that isn't registered.
+     owner) in the same change — the gate rejects an `@flag` that isn't registered.
 
 4. **Present the contracts for approval.** "Here are the contracts I'll implement
-   to — agree?" This is the same approval beat you already do; the artifact is just
-   the metadata now.
+   to — agree?" Approving the contracts == approving the plan.
 
-5. **Implement to the approved contracts.** Write code that satisfies each one
-   exactly — the contract is the spec.
+5. **Implement to the approved contracts.** The contract is the spec.
 
-6. **Verify before declaring done:**
-   ```
-   python3 .github/tools/check_metadata.py
-   ```
-   It must pass. A failure means the code and the agreed contract disagree — fix
-   the code, or, if the intent genuinely changed during implementation, re-confirm
-   the revised contract with the engineer (don't silently edit it to match).
+6. **Verify.** The CI gate (the dist-brain metadata gate) enforces the contracts on
+   every PR. To check locally, run the engine's `check_metadata.py --root .` against
+   your checkout. A failure means code and contract disagree — fix the code, or, if
+   intent genuinely changed, re-confirm the revised contract with the engineer.
 
-## Why this works
+## Why
 
 The plan-approval conversation is where intent is richest and freshest. Capturing
-it as contracts *then* — instead of reconstructing it after the fact — is what
-keeps the metadata as true as the code. The gate keeps them in lockstep forever,
-and the materializer projects them into the wiki on every merge.
+it as contracts *then* keeps the metadata as true as the code. The gate keeps them
+in lockstep; the materializer projects them into the wiki on every merge.
