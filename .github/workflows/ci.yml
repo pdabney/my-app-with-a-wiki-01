@@ -10,6 +10,10 @@ jobs:
   gate:
     uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/gate.yml@v1
 
+  # IaC required-tags gate — fails if any taggable resource is missing a required tag.
+  tags:
+    uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/tags.yml@v1
+
   # App tests stay local to this repo.
   tests:
     runs-on: ubuntu-latest
