@@ -11,7 +11,7 @@ jobs:
     uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/gate.yml@v1
 
   verify:
-    uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/verify.yml@v1.5
+    uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/verify.yml@v1.6
 
   # IaC required-tags gate — fails if any taggable resource is missing a required tag.
   tags:
