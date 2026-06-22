@@ -9,4 +9,7 @@ enabled = true
 startup_timeout_sec = 15
 
 [mcp_servers.dist-brain.env]
-DIST_BRAIN_GRAPH = "https://raw.githubusercontent.com/wiki/pdabney/my-app-with-a-wiki-01/graph.json"
+DIST_BRAIN_GRAPH = "/home/patdabney/.grok/brains/my-app-with-a-wiki-01/brain.sqlite"
+DIST_BRAIN_REVISION = "main"
+# After wiki CI publishes sqlite (wiki.yml @v1.7+), switch to:
+# DIST_BRAIN_GRAPH = "https://raw.githubusercontent.com/wiki/pdabney/my-app-with-a-wiki-01/brain.sqlite"

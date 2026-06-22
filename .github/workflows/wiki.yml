@@ -8,6 +8,6 @@ on:
 
 jobs:
   wiki:
-    uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/wiki.yml@v1
+    uses: paddyodab/dist-brain-metadata-tooling/.github/workflows/wiki.yml@v1.7
     secrets:
       wiki-token: ${{ secrets.WIKI_TOKEN }}
